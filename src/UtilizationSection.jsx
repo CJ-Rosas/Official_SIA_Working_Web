@@ -1,5 +1,5 @@
-import React from 'react';
-import { COST_CENTERS } from './data/costCenters';
+import React, { useState } from "react";
+import { COST_CENTERS } from "./data/costCenters";
 
 function UtilizationSection({
   table1Rows,
@@ -7,33 +7,49 @@ function UtilizationSection({
   availableFund,
   onAddRow,
   onUpdateRow,
-  onDeleteRow
+  onDeleteRow,
 }) {
-  const subtotal1 = table1Rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
-  const subtotal2 = table2Rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+  const subtotal1 = table1Rows.reduce(
+    (sum, r) => sum + (parseFloat(r.amount) || 0),
+    0,
+  );
+  const subtotal2 = table2Rows.reduce(
+    (sum, r) => sum + (parseFloat(r.amount) || 0),
+    0,
+  );
+
+  const [warningb, setWarningb] = useState("");
+  const [warning2, setWarning2] = useState("");
+  const [warning1, setWarning1] = useState("");
 
   // Validates disbursement amounts according to script_2 rules
   const handleAmountBlur = (tableIndex, id, value) => {
     let numeric = parseFloat(value) || 0;
 
+    setWarning1("");
+    setWarning2("");
+    setWarningb("");
+
     if (tableIndex === 1 && numeric > 3000) {
-      alert("Table 1 is restricted to disbursements of PHP 3,000 or less.");
+      setWarning1("Amount cannot exceed PHP 3,000 for this section.");
       numeric = 3000;
     }
     if (tableIndex === 2 && numeric < 3000) {
-      alert("Table 2 is restricted to disbursements of PHP 3,000 or more.");
+      setWarning2(
+        "Table 2 is restricted to disbursements of PHP 3,000 or more.",
+      );
       numeric = 3000;
     }
-    if (numeric <= 0) {
-      alert("Amount cannot be negative or zero.");
-      numeric = 1;
+    if (numeric < 0) {
+      setWarningb("Amount cannot be negative.");
+      numeric = 0;
     }
     if (numeric > availableFund) {
-      alert("Amount exceeds available fund.");
-      numeric = 1;
+      setWarningb("Amount exceeds available fund.");
+      numeric = 0;
     }
 
-    onUpdateRow(tableIndex, id, 'amount', numeric.toFixed(2));
+    onUpdateRow(tableIndex, id, "amount", numeric.toFixed(2));
   };
 
   const renderTable = (rows, tableIndex, title, subtitle, subtotal) => (
@@ -62,7 +78,9 @@ function UtilizationSection({
                   type="date"
                   className="row-date"
                   value={row.date}
-                  onChange={(e) => onUpdateRow(tableIndex, row.id, 'date', e.target.value)}
+                  onChange={(e) =>
+                    onUpdateRow(tableIndex, row.id, "date", e.target.value)
+                  }
                 />
               </td>
               <td>
@@ -70,10 +88,12 @@ function UtilizationSection({
                   <span className="ref-prefix">PCDF NO.</span>
                   <input
                     type="number"
-                    className={`ref-input ${!row.isFirstRow ? 'readonly-input' : ''}`}
+                    className={`ref-input ${!row.isFirstRow ? "readonly-input" : ""}`}
                     value={row.refNum}
                     readOnly={!row.isFirstRow}
-                    onChange={(e) => onUpdateRow(tableIndex, row.id, 'refNum', e.target.value)}
+                    onChange={(e) =>
+                      onUpdateRow(tableIndex, row.id, "refNum", e.target.value)
+                    }
                   />
                 </div>
               </td>
@@ -84,7 +104,14 @@ function UtilizationSection({
                   placeholder="Code"
                   list="cc-list"
                   value={row.costCenterCode}
-                  onChange={(e) => onUpdateRow(tableIndex, row.id, 'costCenterCode', e.target.value)}
+                  onChange={(e) =>
+                    onUpdateRow(
+                      tableIndex,
+                      row.id,
+                      "costCenterCode",
+                      e.target.value,
+                    )
+                  }
                 />
               </td>
               <td>
@@ -101,7 +128,14 @@ function UtilizationSection({
                   className="manual-desc"
                   placeholder="Expense details..."
                   value={row.description}
-                  onChange={(e) => onUpdateRow(tableIndex, row.id, 'description', e.target.value)}
+                  onChange={(e) =>
+                    onUpdateRow(
+                      tableIndex,
+                      row.id,
+                      "description",
+                      e.target.value,
+                    )
+                  }
                 />
               </td>
               <td>
@@ -111,8 +145,12 @@ function UtilizationSection({
                   step="0.01"
                   max={tableIndex === 1 ? "3000" : undefined}
                   value={row.amount}
-                  onChange={(e) => onUpdateRow(tableIndex, row.id, 'amount', e.target.value)}
-                  onBlur={(e) => handleAmountBlur(tableIndex, row.id, e.target.value)}
+                  onChange={(e) =>
+                    onUpdateRow(tableIndex, row.id, "amount", e.target.value)
+                  }
+                  onBlur={(e) =>
+                    handleAmountBlur(tableIndex, row.id, e.target.value)
+                  }
                 />
               </td>
               <td>
@@ -129,15 +167,17 @@ function UtilizationSection({
         </tbody>
         <tfoot>
           <tr className="subtotal-row">
-            <td colSpan="5" className="subtotal-label">Subtotal:</td>
+            <td colSpan="5" className="subtotal-label">
+              Subtotal:
+            </td>
             <td className="subtotal-value">Php {subtotal.toFixed(2)}</td>
             <td></td>
           </tr>
         </tfoot>
       </table>
-      <button 
-        type="button" 
-        className="add-btn" 
+      <button
+        type="button"
+        className="add-btn"
         onClick={() => onAddRow(tableIndex)}
       >
         + Add Row
@@ -155,20 +195,32 @@ function UtilizationSection({
         ))}
       </datalist>
 
+      {/* Inline Warning Message */}
+      {warningb && <h4 className="inline-warning">⚠️ {warningb}</h4>}
+
+      {/* Inline Warning Message */}
+      {warning1 && <h4 className="inline-warning">⚠️ {warning1}</h4>}
+
       {renderTable(
         table1Rows,
         1,
         "Fund Utilization",
         "(PHP3,000 OR LESS CASH DISBURSEMENTS)",
-        subtotal1
+        subtotal1,
       )}
+
+      {/* Inline Warning Message */}
+      {warningb && <h4 className="inline-warning">⚠️ {warningb}</h4>}
+
+      {/* Inline Warning Message */}
+      {warning2 && <h4 className="inline-warning">⚠️ {warning2}</h4>}
 
       {renderTable(
         table2Rows,
         2,
         "Fund Utilization",
         "(MORE THAN PHP3,000 CASH DISBURSEMENTS)",
-        subtotal2
+        subtotal2,
       )}
     </>
   );

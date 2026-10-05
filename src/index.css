@@ -367,3 +367,24 @@ select#FLR-Report option {
     color: var(--text-primary); /*[cite: 15] */
     padding: 10px;
 }
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 300px;
+}
+
+/* Red border when an error occurs */
+input.input-error {
+  border: 1.5px solid #d9534f;
+  outline: none;
+}
+
+/* Styled inline warning label */
+.inline-warning {
+  color: #d9534f;
+  font-size: 0.825rem;
+  font-weight: 500;
+  margin-top: 2px;
+}
