@@ -23,7 +23,7 @@ function App() {
 
   // Summary State
   const [summary, setSummary] = useState({
-    assignedFund: '0.00',
+    assignedFund: '50000.00',
     fundBalance: '0.00',
     replenishment: '0.00'
   });
